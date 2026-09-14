@@ -4,44 +4,42 @@ import struct
 import sys
 import threading
 
+from connection import Connection
+from listener import Listener
+
+
 class Server:
     def __init__(self,host:str,port:int)->Server:
         self.host=host
         self.port=port
 
     def start(self)->None:
-        listener=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        listener.bind((self.host,self.port))
-        listener.listen(1000)
-        print(f'Server listening on {self.host}:{self.port}')
-        try:
-            while True:
-                conn, addr = listener.accept()
-                handle=Handler(conn)
-                handle.start()
-        except KeyboardInterrupt:
-            print("\nExiting server as per user request!")
-            conn.close()
+        with Listener(self.host, self.port) as listener:
+            try:
+                while True:
+                    conn = listener.accept()
+                    handle=Handler(conn)
+                    handle.start()
+            except KeyboardInterrupt:
+                print("\nExiting server as per user request!")
+                conn.close()
 
                 
 
 #We are inspired by the slides!
 class Handler(threading.Thread):
-    def __init__(self, connection:socket.socket):
+    def __init__(self, connection:Connection):
         super().__init__()
         self.connection=connection
         
     def run(self):
         try:
             con = self.connection
-            data_header = con.recv(4)
-            if not data_header:
+            data_length, message = con.receive_message()
+            if not data_length:
                 return
-            data_length = struct.unpack('<i', data_header)[0]
-            data = con.recv(data_length).decode()
-            print(f'Received data: {data}\nData length: {data_length}')
-            response = f"Data received: {data}"
-            con.sendall(response.encode())
+            response = f"Message received: {message}"
+            con.send_message(response.encode())
         except ConnectionError:
             print("Connection Lost!")
 
