@@ -16,22 +16,40 @@ class Connection:
         data_header=struct.pack('<i', len(message))
         self.connection.sendall(data_header+message)
 
+    def _receive_exactly(self, n):
+        data = b''
+
+        while len(data) < n:
+            chunk = self.connection.recv(n - len(data))
+
+            if not chunk:
+                raise ConnectionError("Connection Lost!")
+
+            data += chunk
+
+        return data
+    
     def receive_message(self)->str:
         try:
-            data_header=self.connection.recv(4)
+            data_header=self._receive_exactly(4)
+
             if not data_header:
                 return
+            
             data_length = struct.unpack('<i', data_header)[0]
-            data = self.connection.recv(data_length).decode()
+            data = self._receive_exactly(data_length)
+            data=data.decode()
+
             print(f'Received data: {data}\nData length: {data_length}')
             return (data_length,data)
+        
             # response = f"Data received: {data}"
             # self.connection.sendall(response.encode())
         except ConnectionError:
             raise ConnectionError("Connection Lost!")
         
     @classmethod
-    def connect(cls,host:str,port:int)->None:
+    def connect(cls, host:str, port:int)->None:
         s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         s.connect((host,port))
         return cls(s)

@@ -9,7 +9,7 @@ from listener import Listener
 
 
 class Server:
-    def __init__(self,host:str,port:int)->Server:
+    def __init__(self, host:str, port:int)->Server:
         self.host=host
         self.port=port
 
@@ -21,8 +21,8 @@ class Server:
                     handle=Handler(conn)
                     handle.start()
             except KeyboardInterrupt:
-                print("\nExiting server as per user request!")
                 conn.close()
+                raise KeyboardInterrupt("\nExiting server as per user request!")
 
                 
 
