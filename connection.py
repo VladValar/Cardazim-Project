@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import socket
 import struct
+
+from typing_extensions import Self  # type: ignore
 
 
 class Connection:
@@ -23,6 +27,7 @@ class Connection:
                 return
             data_length = struct.unpack('<i', data_header)[0]
             data = self.connection.recv(data_length).decode()
+            print(f"Received data, data length: {data_length}")
             print(f'Received data: {data}\nData length: {data_length}')
             return (data_length,data)
             # response = f"Data received: {data}"
@@ -39,7 +44,7 @@ class Connection:
     def close(self)->None:
         self.connection.close()
 
-    def __enter__(self)->Connection:
+    def __enter__(self)->Self:
         return self
     
     def __exit__(self, exc_type, exc_value, traceback)->None:
