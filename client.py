@@ -3,21 +3,21 @@ import socket
 import struct
 import sys
 
+from connection import Connection
+
 
 ###########################################################
 ####################### YOUR CODE #########################
 ###########################################################
 
 
-def send_data(server_ip, server_port, data):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+def send_data(server_ip:str, server_port:int, data:str)->None:
+    with Connection(socket.socket(socket.AF_INET, socket.SOCK_STREAM)).connect(server_ip,server_port) as s:
         try:
-            s.connect((server_ip, server_port))
-            data_header=struct.pack('<i', len(data))
-            s.sendall(data_header + data.encode())
+            s.send_message(bytes(data, "utf-8"))
         except Exception as e:
             print(f'Error: {e}')
-    pass
+    
 
 
 ###########################################################
