@@ -13,7 +13,7 @@ from crypt_image import CryptImage
 
 
 def send_data(connection: Connection, data: str) -> None:
-    connection.send_message(b"M" + bytes(data, "utf-8"))
+    connection.send(b"M" + bytes(data, "utf-8"))
 
 
 def send_card(
@@ -31,7 +31,7 @@ def send_card(
     card = Card(
         name=name, creator=creator, image=crypt_image, riddle=riddle, solution=solution
     )
-    connection.send_message(b"C" + card.serialize())
+    connection.send(b"C" + card.serialize())
 
 
 ###########################################################

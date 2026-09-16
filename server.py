@@ -35,7 +35,7 @@ class Handler(threading.Thread):
     def run(self):
         try:
             con = self.connection
-            data_length, data = con.receive_message()
+            data_length, data = con.receive()
             if not data_length:
                 return
             message_type = data[:1]
@@ -52,14 +52,14 @@ class Handler(threading.Thread):
     def handle_message(self, data: bytes) -> None:
         message = data.decode()
         response = f"Message received: {message}"
-        self.connection.send_message(response.encode())
+        self.connection.send(response.encode())
 
     def handle_card(self, data: bytes) -> None:
         card = Card.deserialize(data)
         print(f"Card received: {card.name} from {card.creator}")
 
         response = f"Card received: {card.name} from {card.creator}"
-        self.connection.send_message(response.encode())
+        self.connection.send(response.encode())
 
 
 def get_args():
@@ -74,12 +74,8 @@ def main():
     Implementation of a server.
     """
     args = get_args()
-    try:
-        s = Server(args.server_ip, args.server_port)
-        s.start()
-    except Exception as error:
-        print(f"ERROR: {error}")
-        return 1
+    s = Server(args.server_ip, args.server_port)
+    s.start()
 
 
 if __name__ == "__main__":

@@ -110,12 +110,13 @@ class Card:
             if length == 0:
                 raise ValueError("string can not be empty!")
 
+            value, index = read_bytes(data, index, length)
+            
             try:
-                value, index = read_bytes(data, index, length)
+                return value.decode("utf-8"), index
             except UnicodeDecodeError:
                 raise ValueError("Invalid utf-8 data!")
 
-            return value.decode("utf-8"), index
 
         index = 0
 
